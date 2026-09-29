@@ -3081,12 +3081,15 @@ declare_clippy_lint! {
 
 declare_clippy_lint! {
     /// ### What it does
-    ///* Checks for [push](https://doc.rust-lang.org/std/path/struct.PathBuf.html#method.push)
+    /// Checks for [push](https://doc.rust-lang.org/std/path/struct.PathBuf.html#method.push)
     /// calls on `PathBuf` that can cause overwrites.
     ///
     /// ### Why is this bad?
     /// Calling `push` with a root path at the start can overwrite the
     /// previous defined path.
+    ///
+    /// Note the behavior is platform dependent. A leading `\` is a root on
+    /// Windows but part of the file name on Unix.
     ///
     /// ### Example
     /// ```no_run
