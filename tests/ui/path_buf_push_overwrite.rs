@@ -6,4 +6,14 @@ fn main() {
     let mut x = PathBuf::from("/foo");
     x.push("/bar");
     //~^ path_buf_push_overwrite
+
+    // `\` starts an absolute path on Windows, independent of the platform Clippy runs on.
+    x.push("\\bar");
+    //~^ path_buf_push_overwrite
+
+    x.push(r"\bar");
+    //~^ path_buf_push_overwrite
+
+    x.push("bar");
+    x.push("C:\\bar");
 }

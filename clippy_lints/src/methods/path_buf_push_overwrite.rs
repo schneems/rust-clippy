@@ -5,7 +5,6 @@ use rustc_ast::ast::LitKind;
 use rustc_errors::Applicability;
 use rustc_hir::{Expr, ExprKind};
 use rustc_lint::LateContext;
-use std::path::{Component, Path};
 
 use super::PATH_BUF_PUSH_OVERWRITE;
 
@@ -19,12 +18,9 @@ pub(super) fn check<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'_>, arg: &'t
             .skip_norm_wip()
             .is_diag_item(cx, sym::PathBuf)
         && let ExprKind::Lit(lit) = arg.kind
-        && let LitKind::Str(ref path_lit, _) = lit.node
-        && let pushed_path = Path::new(path_lit.as_str())
-        && let Some(pushed_path_lit) = pushed_path.to_str()
-        && pushed_path.has_root()
-        && let Some(root) = pushed_path.components().next()
-        && root == Component::RootDir
+        && let LitKind::Str(path_lit, _) = lit.node
+        && let path_str = path_lit.as_str()
+        && path_str.starts_with(['/', '\\'])
     {
         span_lint_and_sugg(
             cx,
@@ -32,7 +28,7 @@ pub(super) fn check<'tcx>(cx: &LateContext<'tcx>, expr: &'tcx Expr<'_>, arg: &'t
             lit.span,
             "calling `push` with '/' or '\\' (file system root) will overwrite the previous path definition",
             "try",
-            format!("\"{}\"", pushed_path_lit.trim_start_matches(['/', '\\'])),
+            format!("\"{}\"", path_str.trim_start_matches(['/', '\\'])),
             Applicability::MaybeIncorrect,
         );
     }
